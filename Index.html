@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confronto IRPEF vs Rivalutazione Terreni</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .input-group {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .input-group h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .form-row {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .results-section {
+            margin-top: 40px;
+            display: none;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-top: 5px solid #667eea;
+        }
+        
+        .result-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .comparison-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #f8fff8 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #28a745;
+        }
+        
+        .comparison-section.irpef-better {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f8fdff 100%);
+            border-color: #2196f3;
+        }
+        
+        .comparison-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .savings-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        
+        .savings-amount.irpef {
+            color: #2196f3;
+        }
+        
+        .recommendation {
+            font-size: 1.2rem;
+            color: #495057;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .scaglioni-info {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .scaglioni-info h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .scaglioni-list {
+            font-size: 0.9rem;
+            color: #856404;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Confronto Fiscale Terreni</h1>
+            <p>Calcola la convenienza tra IRPEF e Imposta Sostitutiva del 18%</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <h3>💰 Dati di Vendita</h3>
+                    <div class="form-row">
+                        <label for="corrispettivo">Corrispettivo di Vendita (€)</label>
+                        <input type="number" id="corrispettivo" placeholder="es. 150000" min="0" step="1000">
+                    </div>
+                    <div class="form-row">
+                        <label for="costoOriginario">Costo Fiscale Originario (€)</label>
+                        <input type="number" id="costoOriginario" placeholder="es. 50000" min="0" step="1000">
+                    </div>
+                    <div class="form-row">
+                        <label for="valorePerizia">Valore di Perizia per Rivalutazione (€)</label>
+                        <input type="number" id="valorePerizia" placeholder="es. 75000" min="0" step="1000">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <h3>📊 Dati Fiscali</h3>
+                    <div class="form-row">
+                        <label for="redditoAnnuo">Reddito Annuo Complessivo (€)</label>
+                        <input type="number" id="redditoAnnuo" placeholder="es. 35000" min="0" step="1000">
+                    </div>
+                    <div class="form-row">
+                        <label for="aliquotaAggiuntiva">Aliquota Addizionale Regionale/Comunale (%)</label>
+                        <input type="number" id="aliquotaAggiuntiva" placeholder="es. 1.73" min="0" max="10" step="0.01" value="1.73">
+                    </div>
+                </div>
+            </div>
+            
+            <button class="calculate-btn" onclick="eseguiCalcolo()">
+                🧮 Calcola Confronto
+            </button>
+            
+            <div class="results-section" id="results">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>📈 Tassazione IRPEF</h3>
+                        <div class="result-item">
+                            <span>Plusvalenza:</span>
+                            <span class="result-value" id="plusvalenzaIrpef">€ 0</span>
+                        </div>
+                        <div class="result-item">
+                            <span>IRPEF (100% plusvalenza):</span>
+                            <span class="result-value" id="irpefBase">€ 0</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Addizionali:</span>
+                            <span class="result-value" id="addizionali">€ 0</span>
+                        </div>
+                        <div class="result-item">
+                            <span><strong>Totale IRPEF:</strong></span>
+                            <span class="result-value" id="totaleIrpef">€ 0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>🏢 Imposta Sostitutiva</h3>
+                        <div class="result-item">
+                            <span>Valore Originario:</span>
+                            <span class="result-value" id="valoreOriginario">€ 0</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Valore di Perizia:</span>
+                            <span class="result-value" id="valorePeriziaMostrato">€ 0</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Rivalutazione:</span>
+                            <span class="result-value" id="valoreDiRivalutazione">€ 0</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Imposta Sostitutiva (18%):</span>
+                            <span class="result-value" id="impostaSostitutiva">€ 0</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Plusvalenza con Rivalutazione:</span>
+                            <span class="result-value" id="plusvalenzaSostitutiva">€ 0</span>
+                        </div>
+                        <div class="result-item">
+                            <span><strong>Totale Sostitutiva:</strong></span>
+                            <span class="result-value" id="totaleSostitutiva">€ 0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comparison-section" id="comparison">
+                    <div class="comparison-title">🎯 Scelta Consigliata</div>
+                    <div class="savings-amount" id="savingsAmount">€ 0</div>
+                    <div class="recommendation" id="recommendation">
+                        Inserisci i dati per vedere il confronto
+                    </div>
+                </div>
+                
+                <div class="result-card" style="margin-top: 30px; border-top: 5px solid #ff9800;">
+                    <h3>⚖️ Analisi di Pareggio</h3>
+                    <div class="result-item">
+                        <span>Costo fiscale di pareggio:</span>
+                        <span class="result-value" id="costoFiscalePareggio">€ 0</span>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                        Con questo costo fiscale, IRPEF e imposta sostitutiva sarebbero equivalenti
+                    </div>
+                </div>
+            </div>
+            
+            <div class="scaglioni-info">
+                <h4>ℹ️ Scaglioni IRPEF 2024</h4>
+                <div class="scaglioni-list">
+                    <strong>Scaglioni applicati:</strong><br>
+                    • Fino a €28.000: 23%<br>
+                    • Da €28.001 a €50.000: 35%<br>
+                    • Oltre €50.000: 43%<br><br>
+                    <strong>Note:</strong> Le plusvalenze su terreni edificabili sono tassate al 100% per IRPEF (con detrazioni per lavoro dipendente).
+                    L'imposta sostitutiva del 18% si applica sul valore di perizia inserito per la rivalutazione.
+                    Con la rivalutazione, il nuovo costo fiscale diventa il valore di perizia.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Scaglioni IRPEF 2024
+        const scaglioniIrpef = [
+            { min: 0, max: 28000, aliquota: 0.23 },
+            { min: 28001, max: 50000, aliquota: 0.35 },
+            { min: 50001, max: Infinity, aliquota: 0.43 }
+        ];
+
+        function calcolaDetrazioniLavoroDipendente(reddito) {
+            if (reddito <= 15000) {
+                return 1880;
+            } else if (reddito <= 28000) {
+                return 1910 + (1880 - 1910) * (reddito - 15000) / (28000 - 15000);
+            } else if (reddito <= 50000) {
+                return 1910 * (50000 - reddito) / (50000 - 28000);
+            } else {
+                return 0;
+            }
+        }
+
+        function calcolaIrpefConDetrazioni(reddito) {
+            let imposta = 0;
+            let redditoRimanente = reddito;
+            
+            for (let scaglione of scaglioniIrpef) {
+                if (redditoRimanente <= 0) break;
+                
+                const imponibileScaglione = Math.min(redditoRimanente, scaglione.max - scaglione.min + 1);
+                if (imponibileScaglione > 0) {
+                    imposta += imponibileScaglione * scaglione.aliquota;
+                    redditoRimanente -= imponibileScaglione;
+                }
+            }
+            
+            // Sottrae le detrazioni
+            const detrazioni = calcolaDetrazioniLavoroDipendente(reddito);
+            return Math.max(0, imposta - detrazioni);
+        }
+
+        function calcolaCostoFiscaleDiPareggio(corrispettivo, redditoAnnuo, aliquotaAggiuntiva, valorePerizia) {
+            let costoMin = 0;
+            let costoMax = corrispettivo;
+            let iterazioni = 0;
+            const maxIterazioni = 100;
+            const tolleranza = 1;
+            
+            while (costoMax - costoMin > tolleranza && iterazioni < maxIterazioni) {
+                const costoMedio = (costoMin + costoMax) / 2;
+                
+                // Calcolo IRPEF con costo medio
+                const plusvalenzaTest = corrispettivo - costoMedio;
+                const redditoTotaleTest = redditoAnnuo + plusvalenzaTest;
+                const irpefSenzaPlusvalenzaTest = calcolaIrpefConDetrazioni(redditoAnnuo);
+                const irpefConPlusvalenzaTest = calcolaIrpefConDetrazioni(redditoTotaleTest);
+                const irpefSuPlusvalenzaTest = Math.max(0, irpefConPlusvalenzaTest - irpefSenzaPlusvalenzaTest);
+                const addizionaliTest = plusvalenzaTest * (aliquotaAggiuntiva / 100);
+                const totaleIrpefTest = irpefSuPlusvalenzaTest + addizionaliTest;
+                
+                // Calcolo Imposta Sostitutiva (usa sempre il valore di perizia inserito)
+                const impostaSostitutivaTest = valorePerizia * 0.18;
+                
+                // Confronto
+                if (totaleIrpefTest > impostaSostitutivaTest) {
+                    costoMin = costoMedio;
+                } else {
+                    costoMax = costoMedio;
+                }
+                
+                iterazioni++;
+            }
+            
+            return (costoMin + costoMax) / 2;
+        }
+
+        function eseguiCalcolo() {
+            const corrispettivo = parseFloat(document.getElementById('corrispettivo').value) || 0;
+            const costoOriginario = parseFloat(document.getElementById('costoOriginario').value) || 0;
+            const valorePerizia = parseFloat(document.getElementById('valorePerizia').value) || 0;
+            const redditoAnnuo = parseFloat(document.getElementById('redditoAnnuo').value) || 0;
+            const aliquotaAggiuntiva = parseFloat(document.getElementById('aliquotaAggiuntiva').value) || 0;
+
+            if (corrispettivo <= 0 || costoOriginario <= 0) {
+                alert('Inserisci valori validi per corrispettivo e costo originario');
+                return;
+            }
+            
+            if (valorePerizia <= 0) {
+                alert('Inserisci il valore di perizia per la rivalutazione');
+                return;
+            }
+
+            // Calcolo IRPEF
+            const plusvalenza = corrispettivo - costoOriginario;
+            const plusvalenzaTassabileIrpef = plusvalenza; // 100% tassabile per terreni edificabili
+            const redditoTotale = redditoAnnuo + plusvalenzaTassabileIrpef;
+            
+            // Calcolo IRPEF con detrazioni
+            const irpefSenzaPlusvalenza = calcolaIrpefConDetrazioni(redditoAnnuo);
+            const irpefConPlusvalenza = calcolaIrpefConDetrazioni(redditoTotale);
+            const irpefSuPlusvalenza = Math.max(0, irpefConPlusvalenza - irpefSenzaPlusvalenza);
+            
+            const addizionali = plusvalenzaTassabileIrpef * (aliquotaAggiuntiva / 100);
+            const totaleIrpef = irpefSuPlusvalenza + addizionali;
+
+            // Calcolo Imposta Sostitutiva
+            const valoreDiRivalutazione = valorePerizia - costoOriginario;
+            const impostaSostitutiva = valorePerizia * 0.18; // 18% sul valore di perizia
+            const plusvalenzaConRivalutazione = Math.max(0, corrispettivo - valorePerizia); // Plusvalenza con nuovo costo fiscale
+            const totaleSostitutiva = impostaSostitutiva;
+
+            // Calcolo del costo fiscale di pareggio
+            const costoFiscalePareggioCalcolato = calcolaCostoFiscaleDiPareggio(corrispettivo, redditoAnnuo, aliquotaAggiuntiva, valorePerizia);
+
+            // Aggiornamento interfaccia
+            document.getElementById('plusvalenzaIrpef').textContent = formatCurrency(plusvalenza);
+            document.getElementById('irpefBase').textContent = formatCurrency(irpefSuPlusvalenza);
+            document.getElementById('addizionali').textContent = formatCurrency(addizionali);
+            document.getElementById('totaleIrpef').textContent = formatCurrency(totaleIrpef);
+
+            document.getElementById('valoreOriginario').textContent = formatCurrency(costoOriginario);
+            document.getElementById('valorePeriziaMostrato').textContent = formatCurrency(valorePerizia);
+            document.getElementById('valoreDiRivalutazione').textContent = formatCurrency(valoreDiRivalutazione);
+            document.getElementById('impostaSostitutiva').textContent = formatCurrency(impostaSostitutiva);
+            document.getElementById('plusvalenzaSostitutiva').textContent = formatCurrency(plusvalenzaConRivalutazione);
+            document.getElementById('totaleSostitutiva').textContent = formatCurrency(totaleSostitutiva);
+
+            // Mostra il costo fiscale di pareggio
+            document.getElementById('costoFiscalePareggio').textContent = formatCurrency(costoFiscalePareggioCalcolato);
+
+            // Confronto
+            const comparison = document.getElementById('comparison');
+            const savingsAmount = document.getElementById('savingsAmount');
+            const recommendation = document.getElementById('recommendation');
+
+            if (totaleIrpef < totaleSostitutiva) {
+                const risparmio = totaleSostitutiva - totaleIrpef;
+                comparison.className = 'comparison-section irpef-better';
+                savingsAmount.className = 'savings-amount irpef';
+                savingsAmount.textContent = formatCurrency(risparmio);
+                recommendation.textContent = '✅ Conviene la tassazione IRPEF ordinaria';
+            } else {
+                const risparmio = totaleIrpef - totaleSostitutiva;
+                comparison.className = 'comparison-section';
+                savingsAmount.className = 'savings-amount';
+                savingsAmount.textContent = formatCurrency(risparmio);
+                recommendation.textContent = '✅ Conviene l\'imposta sostitutiva del 18%';
+            }
+
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('it-IT', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        // Calcolo automatico quando si cambiano i valori
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (document.getElementById('corrispettivo').value && 
+                        document.getElementById('costoOriginario').value &&
+                        document.getElementById('valorePerizia').value) {
+                        eseguiCalcolo();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
